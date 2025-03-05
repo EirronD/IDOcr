@@ -14,17 +14,20 @@ address_pattern = r"(\d{4}\s[A-Z]+\s[A-Z]+\s[A-Z]+)"
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 
+import base64
+from io import BytesIO
+
 @app.route('/extract_text', methods=['POST'])
 def extract_text():
-    if 'image' not in request.files:
-        return jsonify({"error": "No image file found"}), 400
-    
-    file = request.files['image']
-    
-    # Convert image to OpenCV format
-    image = Image.open(file)
+    data = request.get_json()
+    if 'image' not in data:
+        return jsonify({"error": "No image data found"}), 400
+
+    # Decode Base64 image
+    image_data = base64.b64decode(data['image'])
+    image = Image.open(BytesIO(image_data))
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-    
+
     # Extract text from the image using pytesseract
     extracted_text = pytesseract.image_to_string(image)
 
