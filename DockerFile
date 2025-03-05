@@ -1,17 +1,23 @@
-# Use the official Python image
+# Use a base image with Python
 FROM python:3.12
 
-# Install required system packages (including Tesseract)
-RUN apt-get update && apt-get install -y tesseract-ocr
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    libtesseract-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy all project files into the container
-COPY . /app
+# Copy project files
+COPY . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Run the application
+# Expose port 8080
+EXPOSE 8080
+
+# Run the app
 CMD ["python", "idocr.py"]
