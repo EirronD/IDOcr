@@ -6,6 +6,8 @@ from PIL import Image
 import pytesseract
 import os
 
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 app = Flask(__name__)
 
 # Define regex patterns
