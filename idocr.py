@@ -44,7 +44,7 @@ def extract_text():
     id_match = re.search(id_pattern, extracted_text)
     match = re.search(nationality_sex_birthday_pattern, extracted_text)
 
-id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
+    id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
     # Construct response
     response_data = {
         "name": name_match.group(0) if name_match else None,
