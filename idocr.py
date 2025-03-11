@@ -33,6 +33,7 @@ def extract_text():
 
     # Extract text from the image using pytesseract
     extracted_text = pytesseract.image_to_string(image)
+    print(extracted_text)
 
     # Extract information using regex
     name_match = re.search(name_pattern, extracted_text)
