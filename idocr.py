@@ -11,8 +11,8 @@ pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 app = Flask(__name__)
 
 # Define regex patterns
-name_pattern = r"([A-Z]+,\s[A-Z]+\s[A-Z]+)"
-nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\\d{4}/\\d{2}/\\d{2})"
+name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
+nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 address_pattern = r"(\d{4}\s[A-Z]+\s[A-Z]+\s[A-Z]+)"
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
@@ -31,8 +31,11 @@ def extract_text():
     image = Image.open(BytesIO(image_data))
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+
     # Extract text from the image using pytesseract
-    extracted_text = pytesseract.image_to_string(image)
+    extracted_text = pytesseract.image_to_string(thresh)
 
     # Extract information using regex
     name_match = re.search(name_pattern, extracted_text)
@@ -41,9 +44,7 @@ def extract_text():
     id_match = re.search(id_pattern, extracted_text)
     match = re.search(nationality_sex_birthday_pattern, extracted_text)
 
-    # Correct the ID number by replacing the first '0' with 'D'
-    id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
-
+id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
     # Construct response
     response_data = {
         "name": name_match.group(0) if name_match else None,
