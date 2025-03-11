@@ -31,11 +31,8 @@ def extract_text():
     image = Image.open(BytesIO(image_data))
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-
     # Extract text from the image using pytesseract
-    extracted_text = pytesseract.image_to_string(thresh)
+    extracted_text = pytesseract.image_to_string(image)
 
     # Extract information using regex
     name_match = re.search(name_pattern, extracted_text)
