@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # Define regex patterns
 name_pattern = r"([A-Z]+,\s[A-Z]+\s[A-Z]+)"
-nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
+nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\\d{4}/\\d{2}/\\d{2})"
 address_pattern = r"(\d{4}\s[A-Z]+\s[A-Z]+\s[A-Z]+)"
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
@@ -47,7 +47,6 @@ def extract_text():
     # Construct response
     response_data = {
         "name": name_match.group(0) if name_match else None,
-        "date_of_birth": f"{dob_match.group(1)} {dob_match.group(2)} {dob_match.group(3)}" if dob_match else None,
         "address": address_match.group(0) if address_match else None,
         "id_number": id_corrected,
         "nationality": match.group(1) if match else None,
