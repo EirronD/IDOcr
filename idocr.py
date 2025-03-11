@@ -11,7 +11,7 @@ pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 app = Flask(__name__)
 
 # Define regex patterns
-name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
+name_pattern = r"([A-Z]+,\s[A-Z]+\s[A-Z]+)"
 nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 address_pattern = r"(\d{4}\s[A-Z]+\s[A-Z]+\s[A-Z]+)"
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
@@ -41,7 +41,9 @@ def extract_text():
     id_match = re.search(id_pattern, extracted_text)
     match = re.search(nationality_sex_birthday_pattern, extracted_text)
 
+    # Correct the ID number by replacing the first '0' with 'D'
     id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
+
     # Construct response
     response_data = {
         "name": name_match.group(0) if name_match else None,
@@ -57,4 +59,3 @@ def extract_text():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
-
