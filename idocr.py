@@ -13,7 +13,7 @@ app = Flask(__name__)
 # Define regex patterns
 name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
 nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
-address_pattern = r"(\d{4}\s[A-Z]+\s[A-Z]+\s[A-Z]+)"
+address_pattern = r"(?:(?:\d{4}\s)?(?:[A-Z]+(?:\s[A-Z]+)*))(?:,\s[A-Z]+(?:\s[A-Z]+)*)*(?:,\s\d{4})?"
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 
