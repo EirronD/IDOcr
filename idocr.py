@@ -27,13 +27,30 @@ def extract_text():
 
     try:
         image_data = base64.b64decode(data['image'])
+
         image = Image.open(BytesIO(image_data))
         image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-        cv2.imwrite("debug_image.jpg", image)
+# Grayscale conversion
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        extracted_text = pytesseract.image_to_string(image, config="--psm 6")
-        print(extracted_text)
+# Adaptive Thresholding
+        thresh = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        )
+# Denoise
+        denoised = cv2.fastNlMeansDenoising(thresh, None, 30, 7, 21)
+
+# Resize for better accuracy
+        resized = cv2.resize(denoised, None, fx=2, fy=2,
+                             interpolation=cv2.INTER_CUBIC)
+
+# Extract text using Tesseract
+        custom_config = r'--oem 3 --psm 6'
+        extracted_text = pytesseract.image_to_string(
+            resized, config=custom_config)
+
+        print(extracted_text)  # Debugging
 
         name_match = re.search(name_pattern, extracted_text)
         dob_match = re.search(dob_pattern, extracted_text)
