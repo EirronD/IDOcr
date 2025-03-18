@@ -14,7 +14,8 @@ app = Flask(__name__)
 
 name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
 nationality_sex_birthday_pattern = r"([A-Z]{3})\s*([A-Z])\s*(\d{4}[/-]\d{2}[/-]\d{2})"
-address_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+)"
+#address_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+)"
+address_pattern = r"([A-Z\s]+(?:,\s*[A-Z\s]+)*)"
 id_pattern = r"(?:D|\d)\d{2}-\d{2}-\d{6}"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 
