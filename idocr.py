@@ -13,8 +13,10 @@ pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 app = Flask(__name__)
 
 name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
-nationality_sex_birthday_pattern = r"([A-Z]{3})\s*([A-Z])\s*(\d{4}[/-]\d{2}[/-]\d{2})"
-#address_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+)"
+nationality_pattern = r"\b[A-Z]{3}\b"
+sex_pattern = r"\b[M|F]\b"
+birthday_pattern = r"\b\d{4}[/\-]\d{2}[/\-]\d{2}\b"
+# address_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+)"
 address_pattern = r"([A-Z\s]+(?:,\s*[A-Z\s]+)*)"
 id_pattern = r"(?:D|\d)\d{2}-\d{2}-\d{6}"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
@@ -39,10 +41,13 @@ def extract_text():
         print(extracted_text)
 
         name_match = re.search(name_pattern, extracted_text)
-        dob_match = re.search(dob_pattern, extracted_text)
         address_match = re.search(address_pattern, extracted_text)
         id_match = re.search(id_pattern, extracted_text)
-        match = re.search(nationality_sex_birthday_pattern, extracted_text)
+
+        nationality_match = re.search(nationality_pattern, extracted_text)
+
+        sex_match = re.search(sex_pattern, extracted_text)
+        birthday_match = re.search(birthday_pattern, extracted_text)
 
         id_corrected = None
 
@@ -55,9 +60,9 @@ def extract_text():
             "name": name_match.group(0) if name_match else None,
             "address": address_match.group(0) if address_match else None,
             "id_number": id_corrected,
-            "nationality": match.group(1) if match else None,
-            "sex": match.group(2) if match else None,
-            "birthday": match.group(3) if match else None,
+            "nationality": nationality_match.group(0) if nationality_match else None,
+            "sex": sex_match.group(0) if sex_match else None,
+            "birthday": birthday_match.group(0) if birthday_match else None,
         }
 
         return jsonify(response_data)
