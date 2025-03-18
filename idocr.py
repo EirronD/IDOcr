@@ -5,21 +5,20 @@ from flask import Flask, request, jsonify
 from PIL import Image
 import pytesseract
 import os
-import base64
-from io import BytesIO
-import requests
 
-OCR_API_KEY = "K82862475188957"
-OCR_URL = "https://api.ocr.space/parse/image"
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 app = Flask(__name__)
 
-name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
+# Define regex patterns
+name_pattern = r"([A-Z]+,\s[A-Z]+\s[A-Z]+)"
 nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
-address_pattern = r"(?:(?:\d{4}\s)?(?:[A-Z]+(?:\s[A-Z]+)*))(?:,\s[A-Z]+(?:\s[A-Z]+)*)*(?:,\s\d{4})?"
+address_pattern = r"(\d{4}\s[A-Z]+\s[A-Z]+\s[A-Z]+)"
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 
+import base64
+from io import BytesIO
 
 @app.route('/extract_text', methods=['POST'])
 def extract_text():
@@ -27,37 +26,23 @@ def extract_text():
     if 'image' not in data:
         return jsonify({"error": "No image data found"}), 400
 
-    try:
-        # Decode base64 image
-        image_data = base64.b64decode(data['image'])
+    # Decode Base64 image
+    image_data = base64.b64decode(data['image'])
+    image = Image.open(BytesIO(image_data))
+    image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-        # Send image to OCR.space API
-        response = requests.post(
-            OCR_URL,
-            files={"image": ("image.png", image_data)},
-            data={
-                "apikey": OCR_API_KEY,
-                "language": "eng",
-                "isOverlayRequired": False
-            },
-        )
+    # Extract text from the image using pytesseract
+    extracted_text = pytesseract.image_to_string(image)
 
-        result = response.json()
+    # Extract information using regex
+    name_match = re.search(name_pattern, extracted_text)
+    dob_match = re.search(dob_pattern, extracted_text)
+    address_match = re.search(address_pattern, extracted_text)
+    id_match = re.search(id_pattern, extracted_text)
+    match = re.search(nationality_sex_birthday_pattern, extracted_text)
 
-        # Extract text from OCR.space response
-        if result["OCRExitCode"] == 1:
-            extracted_text = result["ParsedResults"][0]["ParsedText"]
-            print(extracted_text)  # Debugging
-
-            # Pattern matching
-            name_match = re.search(name_pattern, extracted_text)
-            dob_match = re.search(dob_pattern, extracted_text)
-            address_match = re.search(address_pattern, extracted_text)
-            id_match = re.search(id_pattern, extracted_text)
-            match = re.search(nationality_sex_birthday_pattern, extracted_text)
-
-            id_corrected = re.sub(
-                r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
+    # Correct the ID number by replacing the first '0' with 'D'
+    id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
 
             response_data = {
                 "name": name_match.group(0) if name_match else None,
@@ -69,13 +54,6 @@ def extract_text():
             }
 
             return jsonify(response_data)
-
-        else:
-            return jsonify({"error": "OCR failed", "message": result.get("ErrorMessage", "Unknown error")}), 500
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
