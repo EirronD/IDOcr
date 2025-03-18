@@ -1,3 +1,5 @@
+from io import BytesIO
+import base64
 import re
 import cv2
 import numpy as np
@@ -17,8 +19,6 @@ address_pattern = r"(\d{4}\s[A-Z]+\s[A-Z]+\s[A-Z]+)"
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 
-import base64
-from io import BytesIO
 
 @app.route('/extract_text', methods=['POST'])
 def extract_text():
@@ -42,18 +42,20 @@ def extract_text():
     match = re.search(nationality_sex_birthday_pattern, extracted_text)
 
     # Correct the ID number by replacing the first '0' with 'D'
-    id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
+    id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1",
+                          id_match.group(0)) if id_match else None
 
-            response_data = {
-                "name": name_match.group(0) if name_match else None,
-                "address": address_match.group(0) if address_match else None,
-                "id_number": id_corrected,
-                "nationality": match.group(1) if match else None,
-                "sex": match.group(2) if match else None,
-                "birthday": match.group(3) if match else None,
-            }
+    response_data = {
+        "name": name_match.group(0) if name_match else None,
+        "address": address_match.group(0) if address_match else None,
+        "id_number": id_corrected,
+        "nationality": match.group(1) if match else None,
+        "sex": match.group(2) if match else None,
+        "birthday": match.group(3) if match else None,
+    }
 
-            return jsonify(response_data)
+    return jsonify(response_data)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
