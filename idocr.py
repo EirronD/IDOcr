@@ -32,7 +32,9 @@ def extract_text():
 
         cv2.imwrite("debug_image.jpg", image)
 
-        extracted_text = pytesseract.image_to_string(image, config="--psm 6")
+        extracted_text = pytesseract.image_to_string(
+            image, config="--psm 4 -l eng")
+
         print(extracted_text)
 
         name_match = re.search(name_pattern, extracted_text)
