@@ -13,10 +13,11 @@ pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 app = Flask(__name__)
 
 name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
-nationality_sex_birthday_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
-address_pattern = r"(?:(?:\d{4}\s)?(?:[A-Z]+(?:\s[A-Z]+)*))(?:,\s[A-Z]+(?:\s[A-Z]+)*)*(?:,\s\d{4})?"
-id_pattern = r"(\d{3}-\d{2}-\d{6})"
+nationality_sex_birthday_pattern = r"([A-Z]{3})\s*([A-Z])\s*(\d{4}[/-]\d{2}[/-]\d{2})"
+address_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+)"
+id_pattern = r"(?:D|\d)\d{2}-\d{2}-\d{6}"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
+
 
 @app.route('/extract_text', methods=['POST'])
 def extract_text():
@@ -40,7 +41,12 @@ def extract_text():
         id_match = re.search(id_pattern, extracted_text)
         match = re.search(nationality_sex_birthday_pattern, extracted_text)
 
-        id_corrected = re.sub(r"\b0(\d{2})\b", r"D\1", id_match.group(0)) if id_match else None
+        id_corrected = None
+
+        if id_match:
+            id_number = id_match.group(0)
+            id_corrected = "D" + \
+                id_number[1:] if id_number[0] != "D" else id_number
 
         response_data = {
             "name": name_match.group(0) if name_match else None,
@@ -55,6 +61,7 @@ def extract_text():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
