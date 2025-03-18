@@ -18,13 +18,6 @@ address_pattern = r"(?:(?:\d{4}\s)?(?:[A-Z]+(?:\s[A-Z]+)*))(?:,\s[A-Z]+(?:\s[A-Z
 id_pattern = r"(\d{3}-\d{2}-\d{6})"
 dob_pattern = r"([A-Z]{3})\s([A-Z])\s(\d{4}/\d{2}/\d{2})"
 
-def preprocess_image(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    processed = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-    processed = cv2.GaussianBlur(processed, (3, 3), 0)
-
-    return processed
-
 @app.route('/extract_text', methods=['POST'])
 def extract_text():
     data = request.get_json()
@@ -36,11 +29,9 @@ def extract_text():
         image = Image.open(BytesIO(image_data))
         image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-        processed_image = preprocess_image(image)
+        cv2.imwrite("debug_image.jpg", image)
 
-        cv2.imwrite("debug_image.jpg", processed_image)
-
-        extracted_text = pytesseract.image_to_string(processed_image, config="--psm 6")
+        extracted_text = pytesseract.image_to_string(image, config="--psm 6")
         print(extracted_text)
 
         name_match = re.search(name_pattern, extracted_text)
