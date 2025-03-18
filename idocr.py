@@ -1,7 +1,18 @@
+import re
+import cv2
+import numpy as np
+from flask import Flask, request, jsonify
+from PIL import Image
+import pytesseract
+import os
+import base64
+from io import BytesIO
 import requests
 
 OCR_API_KEY = "K82862475188957"
 OCR_URL = "https://api.ocr.space/parse/image"
+
+app = Flask(__name__)
 
 @app.route('/extract_text', methods=['POST'])
 def extract_text():
