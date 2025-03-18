@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
 sex_pattern = r"\b[M|F]\b"
-birthday_pattern = r"\b\d{4}[/\-]\d{2}[/\-]\d{2}\b"
+birthday_pattern = r"\b\d{4}/\d{2}/\d{2}\b"
 # address_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+)"
 # address_pattern = r"([A-Z\s]+(?:,\s*[A-Z\s]+)*)"
 address_pattern = r"([A-Z0-9\s]+(?:LAGUNA|CITY|PROVINCE|STREET|ROAD))"
