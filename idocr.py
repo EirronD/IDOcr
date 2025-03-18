@@ -42,9 +42,6 @@ def extract_text():
         name_match = re.search(name_pattern, extracted_text)
         address_match = re.search(address_pattern, extracted_text)
         id_match = re.search(id_pattern, extracted_text)
-
-        nationality_match = re.search(nationality_pattern, extracted_text)
-
         sex_match = re.search(sex_pattern, extracted_text)
         birthday_match = re.search(birthday_pattern, extracted_text)
 
