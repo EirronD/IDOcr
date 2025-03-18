@@ -13,7 +13,6 @@ pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 app = Flask(__name__)
 
 name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)?)"
-nationality_pattern = r"\b[A-Z]{3}\b"
 sex_pattern = r"\b[M|F]\b"
 birthday_pattern = r"\b\d{4}[/\-]\d{2}[/\-]\d{2}\b"
 # address_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+(?:\s[A-Z]+)*,\s*[A-Z]+)"
@@ -60,7 +59,7 @@ def extract_text():
             "name": name_match.group(0) if name_match else None,
             "address": address_match.group(0) if address_match else None,
             "id_number": id_corrected,
-            "nationality": nationality_match.group(0) if nationality_match else None,
+            "nationality": "PHL",
             "sex": sex_match.group(0) if sex_match else None,
             "birthday": birthday_match.group(0) if birthday_match else None,
         }
