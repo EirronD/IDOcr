@@ -16,11 +16,11 @@ HEADERS = {
 }
 
 # Regex patterns
-name_pattern = r"([A-Z]+(?:\s[A-Z]+)*,\s[A-Z]+(?:\s[A-Z]+)*)"
+name_pattern = r"\b([A-Z]+(?:\s[A-Z]+)*),\s([A-Z]+(?:\s[A-Z]+)*)\b"
 sex_pattern = r"\b[M|F]\b"
 birthday_pattern = r"\b\d{4}/\d{2}/\d{2}\b"
 address_pattern = r"([A-Z0-9\s]+(?:\sLAGUNA|\sCITY|\sPROVINCE|\sSTREET|\sROAD))"
-id_pattern = r"(?:D|\d)\d{2}-\d{2}-\d{6}"
+id_pattern = r"(?:[A-Z]|\d)\d{2}-\d{2}-\d{6}"
 
 app = Flask(__name__)
 
