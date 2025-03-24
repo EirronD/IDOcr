@@ -2,7 +2,6 @@ import os
 import re
 import requests
 import base64
-import cv2
 import numpy as np
 from flask import Flask, request, jsonify
 from PIL import Image
@@ -19,11 +18,40 @@ HEADERS = {
 name_pattern = r"\b([A-Z]+(?:\s[A-Z]+)*),\s([A-Z]+(?:\s[A-Z]+)*)\b"
 sex_pattern = r"\b[M|F]\b"
 birthday_pattern = r"\b\d{4}/\d{2}/\d{2}\b"
-address_pattern = r"([A-Z0-9\s]+(?:\sLAGUNA|\sCITY|\sPROVINCE|\sSTREET|\sROAD))"
 id_pattern = r"(?:[A-Z]|\d)\d{2}-\d{2}-\d{6}"
 
 app = Flask(__name__)
 
+def extract_address(text, doc_index):
+    # Address patterns
+    patterns = [
+        re.compile(r"Address\s*\n+\s*([\d\w\s,.()'\-]+?LAGUNA(?:,\s*\d{4})?)", re.IGNORECASE),
+        re.compile(r"(?:(?<![\d.]))((?:\d+(?:\s*,\s*)?)?[\w\s,.()'\-]+?LAGUNA(?:,\s*\d{4})?)", re.IGNORECASE)
+    ]
+    
+    for pattern in patterns:
+        matches = pattern.findall(text)
+        if matches:
+            clean_matches = []
+            for match in matches:
+                clean_match = match.strip()
+                
+                # Remove weight/height patterns
+                clean_match = re.sub(r'\b\d+\s*AIGN OFFIEL\b', '', clean_match, flags=re.IGNORECASE)  # Custom fix for the specific issue
+                clean_match = re.sub(r'Weight\s*\(kg\)\s*Height\s*\(m\)\s*\d+\s*\d+\.\d+', '', clean_match, flags=re.IGNORECASE)
+                
+                # Remove standalone numbers that don't fit an address format
+                clean_match = re.sub(r'^\s*\d+\s+(?=\D)', '', clean_match)
+                
+                # Normalize spaces
+                clean_match = re.sub(r'\s+', ' ', clean_match).strip()
+
+                if len(clean_match.split()) > 2:  # Ensuring it's a valid address
+                    clean_matches.append(clean_match)
+            
+            return clean_matches
+    
+    return []
 
 @app.route('/extract_text', methods=['POST'])
 def extract_text():
@@ -51,9 +79,10 @@ def extract_text():
         extracted_text = response.json().get("text", "")
         print("Extracted Text:\n", extracted_text)
 
+        addresses = extract_address(extracted_text, doc_index=0)
+
         # Extract relevant fields
         name_match = re.search(name_pattern, extracted_text)
-        address_match = re.search(address_pattern, extracted_text)
         id_match = re.search(id_pattern, extracted_text)
         sex_match = re.search(sex_pattern, extracted_text)
         birthday_match = re.search(birthday_pattern, extracted_text)
@@ -62,13 +91,12 @@ def extract_text():
         id_corrected = None
         if id_match:
             id_number = id_match.group(0)
-            id_corrected = "D" + \
-                id_number[1:] if id_number[0] != "D" else id_number
+            id_corrected = "D" + id_number[1:] if id_number[0] != "D" else id_number
 
         # JSON response
         response_data = {
             "name": name_match.group(0) if name_match else None,
-            "address": address_match.group(0) if address_match else None,
+            "address": addresses[0] if addresses else None,  # Assuming we want first address
             "id_number": id_corrected,
             "nationality": "PHL",
             "sex": sex_match.group(0) if sex_match else None,
